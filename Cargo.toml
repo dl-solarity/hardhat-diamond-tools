@@ -1,0 +1,25 @@
+[package]
+name = "diamond-merge"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "diamond_merge"
+path = "src/lib.rs"
+
+[dependencies]
+thiserror = "1.0.43"
+ethabi = { workspace = true }
+
+[dev-dependencies]
+lazy_static = "1.4.0"
+
+[workspace]
+members = [
+    ".",
+    "cli"
+]
+
+[workspace.dependencies]
+# TODO(Velnbur): Remove this once the [PR](https://github.com/rust-ethereum/ethabi/pull/298) is merged.
+ethabi = { git = "https://github.com/al8n/ethabi", rev = "3decaeaf6fd716d1623d7d0682ece1c78e1f4f50" }
