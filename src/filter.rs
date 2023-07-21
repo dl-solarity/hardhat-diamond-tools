@@ -61,6 +61,7 @@ mod tests {
                 internal_type: None,
             }],
             outputs: vec![],
+            #[allow(deprecated)]
             constant: None,
             state_mutability: ethabi::StateMutability::NonPayable,
         };
@@ -79,6 +80,7 @@ mod tests {
                 }
             ],
             outputs: vec![],
+            #[allow(deprecated)]
             constant: None,
             state_mutability: ethabi::StateMutability::NonPayable,
         };

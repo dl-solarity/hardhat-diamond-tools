@@ -41,7 +41,7 @@ impl Engine {
                 .functions
                 .clone()
                 .into_iter()
-                .filter(|(_, funcs)| self.filter.filter(&funcs))
+                .filter(|(_, funcs)| self.filter.filter(funcs))
                 .collect::<BTreeMap<_, _>>();
 
             acc.functions.extend(functions);
