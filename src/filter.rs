@@ -50,22 +50,26 @@ fn is_in_filter_set(filter_set: &BTreeSet<String>, methods: &[Function]) -> bool
 #[cfg(test)]
 mod tests {
     use ethabi::{Function, Param, ParamType};
-    use lazy_static::lazy_static;
+    use once_cell::sync::Lazy;
 
-    lazy_static! {
-        static ref FOO_1: Function = Function {
+    static FOO_1: Lazy<Function> = Lazy::new(|| {
+        #[allow(deprecated)]
+        Function {
             name: "foo".to_owned(),
             inputs: vec![Param {
-                name: "foo1".to_owned(),
+                name: String::from("foo"),
                 kind: ParamType::Address,
                 internal_type: None,
             }],
             outputs: vec![],
-            #[allow(deprecated)]
             constant: None,
             state_mutability: ethabi::StateMutability::NonPayable,
-        };
-        static ref FOO_2: Function = Function {
+        }
+    });
+
+    static FOO_2: Lazy<Function> = Lazy::new(|| {
+        #[allow(deprecated)]
+        Function {
             name: "foo".to_owned(),
             inputs: vec![
                 Param {
@@ -77,14 +81,13 @@ mod tests {
                     name: "foo2".to_owned(),
                     kind: ParamType::Address,
                     internal_type: None,
-                }
+                },
             ],
             outputs: vec![],
-            #[allow(deprecated)]
             constant: None,
             state_mutability: ethabi::StateMutability::NonPayable,
-        };
-    }
+        }
+    });
 
     mod is_in_filter {
         use std::collections::BTreeSet;
