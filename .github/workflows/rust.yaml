@@ -45,4 +45,3 @@ jobs:
 
       - name: Run cargo fmt
         run: cargo fmt --all -- --check
-        working-directory: common/algebra
