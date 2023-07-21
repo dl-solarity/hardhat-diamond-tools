@@ -1,0 +1,64 @@
+name: "Run test suite"
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - "master"
+      - "ci*" # Allow testing CI fixes without opening a PR
+
+permissions:
+  contents: read
+
+jobs:
+  tests-pass:
+    name: all systems go
+    runs-on: ubuntu-latest
+    if: ${{ always() && contains(needs.*.result, 'failure') }}
+    steps:
+      - run: exit 1
+    needs:
+      - check-dead-code
+      - check-fmt
+      - tests
+
+  tests:
+    strategy:
+      # Allow other jobs to finish building and cache properly before bailing
+      fail-fast: false
+      matrix:
+        include:
+          - install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+            nixpkgs-override: "--override-input nixpkgs github:NixOS/nixpkgs/release-23.05"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v22
+        with:
+          install_url: ${{ matrix.install_url }}
+      - uses: cachix/cachix-action@v12
+        with:
+          name: dlsl-diamond-tool
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+
+      - name: flake checks
+        run: nix flake check --accept-flake-config --keep-going --print-build-logs ${{ matrix.nixpkgs-override }}
+
+  check-dead-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v22
+      - uses: cachix/cachix-action@v12
+        with:
+          name: deadnix
+      - name: check for dead code
+        run: nix run github:astro/deadnix -- .
+
+  check-fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v22
+      - name: check formatting
+        run: nix fmt --accept-flake-config -- --check .
