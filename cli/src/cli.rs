@@ -40,12 +40,7 @@ pub(crate) struct Cli {
 
 impl Cli {
     pub(crate) fn run(self) -> eyre::Result<()> {
-        let log_level = if self.verbose {
-            log::LevelFilter::Debug
-        } else {
-            log::LevelFilter::Error
-        };
-        SimpleLogger::init(log_level, simplelog::Config::default())?;
+        self.init_logger()?;
 
         let abi_pathes =
             read_abi_pathes_from_dir(self.abis_path, self.follow_symlinks, self.extensions)?;
@@ -56,6 +51,16 @@ impl Cli {
 
         merge_abis(abis, self.include, self.exclude, self.output)?;
 
+        Ok(())
+    }
+
+    fn init_logger(&self) -> eyre::Result<()> {
+        let log_level = if self.verbose {
+            log::LevelFilter::Debug
+        } else {
+            log::LevelFilter::Error
+        };
+        SimpleLogger::init(log_level, simplelog::Config::default())?;
         Ok(())
     }
 }
