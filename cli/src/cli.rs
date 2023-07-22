@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use clap::Parser;
+use simplelog::SimpleLogger;
 
 use crate::actions::*;
 
@@ -29,18 +30,29 @@ pub(crate) struct Cli {
     #[arg(long, default_value = "json")]
     pub(crate) extensions: Vec<String>,
 
+    /// Make the output more verbose.
+    #[arg(short, long)]
+    pub(crate) verbose: bool,
+
     /// The path to ABIs directory to use. Only ABIs with `.json`  extensions will be read.
     pub(crate) abis_path: PathBuf,
 }
 
 impl Cli {
     pub(crate) fn run(self) -> eyre::Result<()> {
-        dbg!(&self);
+        let log_level = if self.verbose {
+            log::LevelFilter::Debug
+        } else {
+            log::LevelFilter::Error
+        };
+        SimpleLogger::init(log_level, simplelog::Config::default())?;
 
         let abi_pathes =
             read_abi_pathes_from_dir(self.abis_path, self.follow_symlinks, self.extensions)?;
-        dbg!(&abi_pathes);
+        log::info!("Found {} ABIs", abi_pathes.len());
+
         let abis = read_abis(abi_pathes)?;
+        log::info!("Read {} ABIs", abis.len());
 
         merge_abis(abis, self.include, self.exclude, self.output)?;
 
