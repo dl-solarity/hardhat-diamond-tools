@@ -1,8 +1,5 @@
 /target
-*.json
-*.abi
 .vscode
 .direnv
 /result
 /result-bin
-node_modules
