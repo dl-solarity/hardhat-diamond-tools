@@ -35,7 +35,7 @@ impl Engine {
         self
     }
 
-    pub fn merge(&mut self) -> &mut Self {
+    pub fn merge(&mut self) {
         self.result = self.abis.iter().fold(Contract::default(), |mut acc, abi| {
             let functions = abi
                 .functions
@@ -49,11 +49,12 @@ impl Engine {
             acc.errors.extend(abi.errors.clone());
             acc
         });
-
-        self
     }
 
     pub fn finish(self) -> Contract {
         self.result
     }
 }
+
+/* Some definitions required for wasm-bindgen */
+impl Engine {}

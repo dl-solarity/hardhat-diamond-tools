@@ -1,22 +1,22 @@
 [package]
-name = "diamond-merge-cli"
+name = "diamond-tools-cli"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
-name = "diamond-merge"
+name = "diamond-tools"
 path = "src/main.rs"
 
 [dependencies]
-diamond-merge = { path = "../" }
+diamond-tools-core = { path = "../core" }
 
 clap = { version = "4.3.17", features = ["derive"] }
 serde = { version = "1.0.173", features = ["derive"] }
 eyre = "0.6.8"
 ethabi = { workspace = true }
-serde_json = "1.0.103"
+serde_json = { workspace = true }
 walkdir = "2.3.3"
 log = "0.4.19"
 simplelog = "0.12.1"

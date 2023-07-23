@@ -60,6 +60,8 @@
             rust-analyzer
             nixfmt
             rnix-lsp
+            nodejs
+            nodePackages.typescript-language-server
           ];
 
           shellHook = ''

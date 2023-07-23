@@ -2,16 +2,37 @@
 
 use std::{ffi::OsString, fs::File, os::unix::prelude::OsStrExt, path::PathBuf};
 
-use diamond_merge::engine::Engine;
+use diamond_tools_core::engine::Engine;
 use ethabi::Contract;
 use eyre::Context;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::hardhat::HarhatAbi;
+use crate::{args::MergeArgs, hardhat::HarhatAbi};
+
+pub(crate) fn merge(
+    MergeArgs {
+        abis_path,
+        follow_symlinks,
+        extensions,
+        include,
+        exclude,
+        output,
+    }: MergeArgs,
+) -> eyre::Result<()> {
+    let abi_pathes = read_abi_pathes_from_dir(abis_path, follow_symlinks, extensions)?;
+    log::info!("Found {} ABIs", abi_pathes.len());
+
+    let abis = read_abis(abi_pathes)?;
+    log::info!("Read {} ABIs", abis.len());
+
+    merge_abis(abis, include, exclude, output)?;
+
+    Ok(())
+}
 
 /// Reads ABIs from the given directory. If recursivly is set to `true`, then
 /// ABIs will be read from all subdirectories as well.
-pub(crate) fn read_abi_pathes_from_dir(
+fn read_abi_pathes_from_dir(
     path: PathBuf,
     follow_symlinks: bool,
     extensions: Vec<String>,
@@ -87,7 +108,7 @@ fn is_dbg_file(entry: &DirEntry) -> bool {
 }
 
 /// Read and parse ABIs from the given pathes.
-pub(crate) fn read_abis(pathes: Vec<PathBuf>) -> eyre::Result<Vec<Contract>> {
+fn read_abis(pathes: Vec<PathBuf>) -> eyre::Result<Vec<Contract>> {
     let mut abis = Vec::with_capacity(pathes.len());
 
     for path in pathes {
@@ -113,7 +134,7 @@ fn read_abi(path: PathBuf) -> eyre::Result<Contract> {
 const DEFAULT_RESULT_FILE: &str = "DiamondProxy.abi";
 
 /// Merge the abis and write the result to the given path.
-pub(crate) fn merge_abis(
+fn merge_abis(
     abis: Vec<Contract>,
     includes: Option<Vec<String>>,
     excludes: Option<Vec<String>>,

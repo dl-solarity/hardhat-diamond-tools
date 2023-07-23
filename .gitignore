@@ -5,3 +5,4 @@
 .direnv
 /result
 /result-bin
+node_modules
