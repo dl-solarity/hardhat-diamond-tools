@@ -211,6 +211,7 @@ dependencies = [
  "diamond-tools-core",
  "ethabi",
  "eyre",
+ "hardhat-bindings",
  "js-sys",
  "serde",
  "serde-wasm-bindgen",
@@ -317,6 +318,19 @@ checksum = "85649ca51fd72272d7821adaf274ad91c288277713d9c18820d8499a7ff69e9a"
 dependencies = [
  "typenum",
  "version_check",
+]
+
+[[package]]
+name = "hardhat-bindings"
+version = "0.1.0"
+dependencies = [
+ "ethabi",
+ "js-sys",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]

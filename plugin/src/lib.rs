@@ -1,10 +1,10 @@
 use diamond_tools_core::{engine::Engine, filter::IncludeExcludeFilter};
+use hardhat_bindings::{
+    bindings::runtime::HardhatRuntimeEnvironment as Hre, HardhatRuntimeEnvironment,
+};
 use js_sys::Promise;
 use wasm_bindgen::prelude::*;
 
-mod types;
-
-use types::{bindings::hre::HardhatRuntimeEnvironment as Hre, HardhatRuntimeEnvironment};
 use wasm_bindgen_futures::future_to_promise;
 
 /// `console.log` for rust.
@@ -75,12 +75,14 @@ pub fn merge_artifacts_action(args: JsValue, hre: Hre, _: JsValue) -> Promise {
         let artifacts = names
             .into_iter()
             .map(|name| artifacts.read_artifact_sync(&name))
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|err| JsValue::from(format!("Failed to read artifacts: {:?}",)))?;
 
         let abis = artifacts
             .into_iter()
             .map(|a| a.abi())
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|err| JsValue::from(format!("Failed to parse and get abis: {:?}", err)))?;
 
         log("Merging artifacts...");
 
