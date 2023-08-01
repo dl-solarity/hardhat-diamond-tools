@@ -334,6 +334,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "hardhat-bindings-macro"
+version = "0.1.0"
+dependencies = [
+ "hardhat-bindings",
+ "js-sys",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde-wasm-bindgen",
+ "syn 2.0.28",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+]
+
+[[package]]
 name = "heck"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

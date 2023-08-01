@@ -4,6 +4,10 @@ members = ["cli", "plugin", "crates/*"]
 [workspace.dependencies]
 serde = "1.0.103"
 serde_json = "1.0.103"
+wasm-bindgen = "=0.2.84"
+js-sys = "0.3.61"
+wasm-bindgen-futures = "0.4.34"
+serde-wasm-bindgen = "0.5.0"
 
 # TODO(Velnbur): Remove this once the [PR](https://github.com/rust-ethereum/ethabi/pull/298) is merged.
 [workspace.dependencies.ethabi]

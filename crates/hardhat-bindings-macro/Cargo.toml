@@ -1,15 +1,19 @@
 [package]
-name = "hardhat-bindings"
+name = "hardhat-bindings-macro"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+proc-macro = true
 
 [dependencies]
+hardhat-bindings = { path = "../hardhat-bindings" }
+
+syn = { version = "2.0", features = ["full"] }
+quote = "1.0"
+proc-macro2 = "1.0"
 wasm-bindgen = { workspace = true }
 js-sys = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
-serde_json = { workspace = true }
 serde = { workspace = true }
-ethabi = { workspace = true }
