@@ -76,7 +76,7 @@ pub fn merge_artifacts_action(args: JsValue, hre: Hre, _: JsValue) -> Promise {
             .into_iter()
             .map(|name| artifacts.read_artifact_sync(&name))
             .collect::<Result<Vec<_>, _>>()
-            .map_err(|err| JsValue::from(format!("Failed to read artifacts: {:?}",)))?;
+            .map_err(|err| JsValue::from(format!("Failed to read artifacts: {:?}", err)))?;
 
         let abis = artifacts
             .into_iter()

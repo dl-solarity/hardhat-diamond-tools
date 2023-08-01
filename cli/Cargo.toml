@@ -10,7 +10,7 @@ name = "diamond-tools"
 path = "src/main.rs"
 
 [dependencies]
-diamond-tools-core = { path = "../core" }
+diamond-tools-core = { path = "../crates/core" }
 
 clap = { version = "4.3.17", features = ["derive"] }
 serde = { version = "1.0.173", features = ["derive"] }

@@ -1,5 +1,5 @@
 [workspace]
-members = ["core", "cli", "plugin", "crates/*"]
+members = ["cli", "plugin", "crates/*"]
 
 [workspace.dependencies]
 serde = "1.0.103"
