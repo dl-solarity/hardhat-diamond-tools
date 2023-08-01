@@ -15,11 +15,13 @@ wasm-bindgen-futures = "0.4.34"
 serde-wasm-bindgen = "0.5.0"
 
 hardhat-bindings = { path = "../crates/hardhat-bindings" }
+hardhat-bindings-macro = { path = "../crates/hardhat-bindings-macro" }
 diamond-tools-core = { path = "../crates/core" }
 
 serde_json = { workspace = true }
 serde = { workspace = true }
 ethabi = { workspace = true }
+thiserror = "1.0.44"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"
