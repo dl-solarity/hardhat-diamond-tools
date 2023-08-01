@@ -7,6 +7,11 @@ use wasm_bindgen::JsValue;
 
 use crate::node_bindings::{log, write_file_sync};
 
+pub const MERGE_TASK: &str = "diamond:merge";
+pub const MERGE_DESCRIPTION: &str = r#"
+    Merges all the compiled artifacts into one with defined with args filters.
+"#;
+
 #[derive(serde::Deserialize, Default)]
 pub struct DiamondMergeArgs {
     pub filter: Option<IncludeExcludeFilter>,

@@ -1,5 +1,8 @@
 use js_sys::Promise;
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::{
+    prelude::{wasm_bindgen, Closure},
+    JsValue,
+};
 
 use super::runtime::HardhatRuntimeEnvironment;
 
@@ -9,7 +12,7 @@ use super::runtime::HardhatRuntimeEnvironment;
 /// we use `any` (see [`JsValue`]). The third one `runSuper`.
 ///
 /// [`ActionType`]: https://github.com/NomicFoundation/hardhat/blob/main/packages/hardhat-core/src/types/runtime.ts#L161
-pub type ActionType = dyn Fn(JsValue, HardhatRuntimeEnvironment, JsValue) -> Promise;
+pub type ActionType = Closure<dyn Fn(JsValue, HardhatRuntimeEnvironment) -> Promise>;
 
 /// The [`ConfigurableTaskDefinition`] bindings for Rust.
 ///

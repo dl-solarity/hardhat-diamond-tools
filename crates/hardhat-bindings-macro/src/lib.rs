@@ -1,5 +1,4 @@
-use proc_macro::Ident;
-use quote::{quote, quote_spanned, spanned::Spanned, ToTokens};
+use quote::{quote, quote_spanned, spanned::Spanned};
 use syn::TypePath;
 
 /// Wrap a function to simplify parsing of the action arguments.

@@ -6,6 +6,11 @@ use wasm_bindgen::JsValue;
 
 use crate::node_bindings::log;
 
+pub const NAMES_TASK: &str = "names";
+pub const NAMES_DESCRIPTION: &str = r#"
+    Prints all the fully qualified names of the compiled artifacts.
+"#;
+
 #[derive(serde::Deserialize, Default)]
 pub struct NamesArgs {}
 

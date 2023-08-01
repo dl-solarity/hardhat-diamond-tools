@@ -2,6 +2,7 @@
   "name": "hardhat-diamond-tools",
   "version": "0.1.0",
   "description": "A rust bindings for Hardhat",
+  "main": "index.js",
   "scripts": {
     "build": "wasm-pack build -t nodejs -m normal",
     "release": "wasm-pack build -t nodejs -m normal --release"
