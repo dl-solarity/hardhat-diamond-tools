@@ -25,6 +25,11 @@ impl Engine {
         }
     }
 
+    pub fn with_filter(mut self, filter: IncludeExcludeFilter) -> Self {
+        self.filter = filter;
+        self
+    }
+
     pub fn with_include(mut self, include: Vec<String>) -> Self {
         self.filter = IncludeExcludeFilter::Include(BTreeSet::from_iter(include));
         self

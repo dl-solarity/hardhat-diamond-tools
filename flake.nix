@@ -31,7 +31,7 @@
           overlays = [ (import rust-overlay) ];
         };
 
-        rustToolchain = pkgs.rust-bin.stable."1.70.0".default;
+        rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
         craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
 
         cli = pkgs.callPackage ./cli { inherit pkgs craneLib; };
@@ -54,13 +54,17 @@
 
           nativeBuildInputs = with pkgs; [
             rustToolchain
+            wasm-pack
+            wasm-bindgen-cli
+            nodejs
+            cargo-generate
+            binaryen
           ];
 
           buildInputs = with pkgs; [
             rust-analyzer
             nixfmt
             rnix-lsp
-            nodejs
             nodePackages.typescript-language-server
           ];
 

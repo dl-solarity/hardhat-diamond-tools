@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use ethabi::Function;
 
-#[derive(Debug)]
+#[derive(Debug, serde::Deserialize)]
 pub enum IncludeExcludeFilter {
     /// Names of the methods that will be included in the merged ABI.
     /// If empty, all methods will be included. If not empty, only methods
