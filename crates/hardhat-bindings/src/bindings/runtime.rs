@@ -1,6 +1,6 @@
 //! The Hardhat Runtime Environment bindings for Rust.
 
-use super::artifacts::Artifacts;
+use crate::bindings::artifacts::Artifacts;
 use wasm_bindgen::prelude::*;
 
 /// The [`HardhatRuntimeEnvironment`] bindings for Rust.
