@@ -2,7 +2,7 @@
 craneLib.buildPackage {
   src = craneLib.cleanCargoSource (craneLib.path ../.);
 
-  cargoExtraArgs = "--package=diamond-merge-cli";
+  cargoExtraArgs = "--package=diamond-tools-cli";
 
   buildInputs = [
     # add your dependencies here
