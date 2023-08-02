@@ -1,3 +1,4 @@
+use convert_case::{Case, Casing};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::{DataStruct, DeriveInput, Error, FieldsNamed, Ident, TypePath};
@@ -58,7 +59,7 @@ fn gen_task_parameter_for_named_fields(
 
 fn gen_task_call_for_field(field: &syn::Field) -> Result<TokenStream, syn::Error> {
     let name = field.ident.as_ref().unwrap();
-    let name_str = name.to_string();
+    let name_str = name.to_string().from_case(Case::Snake).to_case(Case::Camel);
     let ty = &field.ty;
 
     let lines = extract_doc(field);
@@ -69,11 +70,10 @@ fn gen_task_call_for_field(field: &syn::Field) -> Result<TokenStream, syn::Error
 
     Ok(match ty {
         OptionalParamType::Option(VariadicParamType::Plain(_)) => quote! {
-            task.add_param(
+            task.add_optional_param(
                 #name_str,
                 #doc,
                 ::wasm_bindgen::JsValue::from(default.#name),
-                true,
             );
         },
         OptionalParamType::Option(VariadicParamType::Vec(_)) => quote! {
@@ -87,14 +87,13 @@ fn gen_task_call_for_field(field: &syn::Field) -> Result<TokenStream, syn::Error
 
                     __array.into()
                 } else {
-                    ::wasm_bindgen::JsValue::NULL
+                    ::js_sys::Array::new().into()
                 };
 
-                task.add_variadic_positional_param(
+                task.add_optional_variadic_positional_param(
                     #name_str,
                     #doc,
                     __default,
-                    true,
                 );
             };
         },
@@ -102,8 +101,7 @@ fn gen_task_call_for_field(field: &syn::Field) -> Result<TokenStream, syn::Error
             task.add_param(
                 #name_str,
                 #doc,
-                ::wasm_bindgen::JsValue::from(default.#name),
-                false,
+                ::wasm_bindgen::JsValue::from(default.#name.clone()),
             );
         },
         OptionalParamType::Vec(_) => quote! {
@@ -118,9 +116,15 @@ fn gen_task_call_for_field(field: &syn::Field) -> Result<TokenStream, syn::Error
                     #name_str,
                     #doc,
                     __array.into(),
-                    false,
                 );
             };
+        },
+        OptionalParamType::Flag => quote! {
+            task.add_flag(
+                #name_str,
+                #doc,
+                default.#name,
+            );
         },
     }
     .into())
@@ -135,6 +139,7 @@ pub enum OptionalParamType {
     Option(VariadicParamType),
     Vec(syn::Type),
     Plain(syn::Type),
+    Flag,
 }
 
 fn extract_field_param_type(ty: &syn::Type) -> Result<OptionalParamType, syn::Error> {
@@ -180,7 +185,13 @@ fn extract_field_param_type(ty: &syn::Type) -> Result<OptionalParamType, syn::Er
 
             Ok(OptionalParamType::Vec(ty.clone()))
         }
-        _ => Ok(OptionalParamType::Plain(ty.clone())),
+        _ => {
+            if ident.into_token_stream().to_string().as_str() == "bool" {
+                Ok(OptionalParamType::Flag)
+            } else {
+                Ok(OptionalParamType::Plain(ty.clone()))
+            }
+        }
     }
 }
 

@@ -21,3 +21,4 @@ js-sys = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 serde = { workspace = true }
+convert_case = { workspace = true }

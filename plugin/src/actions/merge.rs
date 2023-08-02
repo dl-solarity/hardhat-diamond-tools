@@ -19,7 +19,16 @@ pub const MERGE_DESCRIPTION: &str = r#"
 
 #[derive(serde::Deserialize, Default, TaskParameter)]
 pub struct DiamondMergeArgs {
-    // pub filter: Option<IncludeExcludeFilter>,
+    /// Names of the methods that should be included/excluded to/from the merge.
+    ///
+    /// The filter is defined by `include` or `exclude` args. Only one of them
+    /// can be specified.
+    #[serde(rename = "filteredMethods")]
+    pub filtered_methods: Option<Vec<String>>,
+    /// Use this flag to include the methods into the merge
+    pub include: bool,
+    /// Use this flag to exclude the methods from the merge
+    pub exclude: bool,
     #[serde(rename = "outDir")]
     pub out_dir: Option<String>,
     /// The contract name to use as the base contract for the diamond
@@ -29,6 +38,8 @@ pub struct DiamondMergeArgs {
 
 #[derive(Debug, thiserror::Error)]
 pub enum DiamondMergeError {
+    #[error("Only one of `include` or `exclude` can be specified")]
+    OnlyOneFilter,
     #[error("Failed to get all fully qualified names: {0:?}")]
     GetAllFullyQualifiedNames(JsValue),
     #[error("Failed to read artifacts: {0:?}")]
@@ -67,7 +78,18 @@ pub async fn merge_artifacts_action(
     log("Merging artifacts...");
 
     let mut engine = Engine::new(abis);
-    // .with_filter(args.filter.unwrap_or_default());
+
+    if let Some(filters) = args.filtered_methods {
+        if args.include && args.exclude {
+            return Err(DiamondMergeError::OnlyOneFilter);
+        }
+
+        if args.include {
+            engine = engine.with_include(filters);
+        } else if args.exclude {
+            engine = engine.with_exclude(filters);
+        }
+    }
 
     engine.merge();
 

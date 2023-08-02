@@ -39,7 +39,14 @@ extern "C" {
         name: &str,
         description: &str,
         default_value: JsValue,
-        is_optional: bool,
+    ) -> ConfigurableTaskDefinition;
+
+    #[wasm_bindgen(method, js_name = "addOptionalParam")]
+    pub fn add_optional_param(
+        this: &ConfigurableTaskDefinition,
+        name: &str,
+        description: &str,
+        default_value: JsValue,
     ) -> ConfigurableTaskDefinition;
 
     #[wasm_bindgen(method, js_name = "addVariadicPositionalParam")]
@@ -48,7 +55,22 @@ extern "C" {
         name: &str,
         description: &str,
         default_value: JsValue,
-        is_optional: bool,
+    ) -> ConfigurableTaskDefinition;
+
+    #[wasm_bindgen(method, js_name = "addOptionalVariadicPositionalParam")]
+    pub fn add_optional_variadic_positional_param(
+        this: &ConfigurableTaskDefinition,
+        name: &str,
+        description: &str,
+        default_value: JsValue,
+    ) -> ConfigurableTaskDefinition;
+
+    #[wasm_bindgen(method, js_name = "addFlag")]
+    pub fn add_flag(
+        this: &ConfigurableTaskDefinition,
+        name: &str,
+        description: &str,
+        default_value: bool,
     ) -> ConfigurableTaskDefinition;
 }
 

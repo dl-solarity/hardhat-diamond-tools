@@ -9,6 +9,10 @@ fn test_params_derive() {
         /// Big doc
         ///
         /// With multiple lines
+        pub flag1: bool,
+        /// Big doc
+        ///
+        /// With multiple lines
         ///
         /// And even more
         pub name: String,
