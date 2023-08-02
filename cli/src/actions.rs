@@ -2,12 +2,12 @@
 
 use std::{ffi::OsString, fs::File, os::unix::prelude::OsStrExt, path::PathBuf};
 
-use diamond_tools_core::engine::Engine;
+use diamond_tools_core::{engine::Engine, hardhat::HardhatArtifact};
 use ethabi::Contract;
 use eyre::Context;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::{args::MergeArgs, hardhat::HarhatAbi};
+use crate::args::MergeArgs;
 
 pub(crate) fn merge(
     MergeArgs {
@@ -125,7 +125,7 @@ fn read_abi(path: PathBuf) -> eyre::Result<Contract> {
     let file = File::open(path.clone())
         .wrap_err_with(|| format!("Failed to open ABI file: {:?}", path.clone()))?;
 
-    let hardhat_abi: HarhatAbi = serde_json::from_reader(file)
+    let hardhat_abi: HardhatArtifact = serde_json::from_reader(file)
         .wrap_err_with(|| format!("Failed to parse ABI file: {:?}", path.clone()))?;
 
     Ok(hardhat_abi.abi)

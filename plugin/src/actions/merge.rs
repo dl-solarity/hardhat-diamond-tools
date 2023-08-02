@@ -1,7 +1,7 @@
 //! This module provides action which merges all the compiled artifacts
 //! into one with defined with args filters.
 
-use diamond_tools_core::{engine::Engine, filter::IncludeExcludeFilter};
+use diamond_tools_core::{engine::Engine, filter::IncludeExcludeFilter, hardhat::HardhatArtifact};
 use ethabi::Contract;
 use hardhat_bindings_macro::hardhat_action;
 use wasm_bindgen::JsValue;
@@ -34,12 +34,8 @@ pub enum DiamondMergeError {
     ReadArtifact(JsValue),
     #[error("Failed to parse and get abis: {0:?}")]
     ParseAbi(JsValue),
-    #[error("Failed to merge artifacts: {0:?}")]
-    MergeArtifacts(#[from] serde_json::Error),
-    #[error("Failed to write merged artifact: {0:?}")]
-    WriteArtifact(JsValue),
-    #[error("Failed to create out dir: {0:?}")]
-    CreateOutDir(JsValue),
+    #[error("Failed to write merged artifact: {0}")]
+    WriteArtifact(#[from] WriteError),
 }
 
 const DEFAULT_OUT_DIR: &str = "artifacts/contracts";
@@ -81,18 +77,35 @@ pub async fn merge_artifacts_action(
     Ok(())
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum WriteError {
+    #[error("Failed to form result json: {0}")]
+    FormJson(#[from] serde_json::Error),
+    #[error("Failed to create out dir: {0:?}")]
+    CreateOutDir(JsValue),
+    #[error("Failed to write result json: {0:?}")]
+    WriteJson(JsValue),
+}
+
 async fn write_merged(
     out_contract_name: Option<String>,
     out_dir: Option<String>,
     merged_contract: Contract,
-) -> Result<(), DiamondMergeError> {
-    let abi_json = serde_json::to_string_pretty(&merged_contract)?;
-
+) -> Result<(), WriteError> {
     let contract_name = out_contract_name.unwrap_or_else(|| DEFAULT_OUT_CONTRACT_NAME.to_string());
-    let out_dir = out_dir.unwrap_or_else(|| DEFAULT_OUT_DIR.to_string());
-    let dir_path = format!("{}/{}.sol", out_dir, contract_name);
 
-    log(format!("Writing merged artifact to {}", dir_path).as_str());
+    let hardhat_artifact = HardhatArtifact {
+        contract_name,
+        abi: merged_contract.clone(),
+        ..Default::default()
+    };
+
+    let abi_json = serde_json::to_string_pretty(&hardhat_artifact)?;
+
+    let out_dir = out_dir.unwrap_or_else(|| DEFAULT_OUT_DIR.to_string());
+    let dir_path = format!("{}/{}.sol", out_dir, hardhat_artifact.contract_name);
+
+    log(&format!("Writing merged artifact to {}", dir_path));
 
     fs::mkdir(
         &dir_path,
@@ -102,13 +115,13 @@ async fn write_merged(
         },
     )
     .await
-    .map_err(DiamondMergeError::CreateOutDir)?;
+    .map_err(WriteError::CreateOutDir)?;
 
     fs::write_file_sync(
-        format!("{}/{}.json", dir_path, contract_name).as_str(),
+        &format!("{}/{}.json", dir_path, hardhat_artifact.contract_name),
         &abi_json,
     )
-    .map_err(DiamondMergeError::WriteArtifact)?;
+    .map_err(WriteError::WriteJson)?;
 
     Ok(())
 }
