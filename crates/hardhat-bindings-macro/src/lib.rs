@@ -101,7 +101,7 @@ fn hardhat_action_impl(
 
 fn hardhat_action_get_return_type(
     item: &syn::ItemFn,
-) -> Result<&Box<syn::Type>, proc_macro::TokenStream> {
+) -> Result<&syn::Type, proc_macro::TokenStream> {
     let output = &item.sig.output;
 
     let return_type = match output {

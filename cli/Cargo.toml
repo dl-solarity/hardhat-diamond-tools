@@ -11,12 +11,12 @@ path = "src/main.rs"
 
 [dependencies]
 diamond-tools-core = { path = "../crates/core" }
-
-clap = { version = "4.3.17", features = ["derive"] }
-serde = { version = "1.0.173", features = ["derive"] }
-eyre = "0.6.8"
+serde = { workspace = true }
 ethabi = { workspace = true }
 serde_json = { workspace = true }
+
+clap = { version = "4.3.17", features = ["derive"] }
+eyre = "0.6.8"
 walkdir = "2.3.3"
 log = "0.4.19"
 simplelog = "0.12.1"

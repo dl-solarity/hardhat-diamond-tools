@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "wasm-pack build -t nodejs -m normal",
-    "release": "wasm-pack build -t nodejs -m normal --release"
+    "release": "wasm-pack build -t nodejs -m normal --release . -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort"
   },
   "devDependencies": {
     "@wasm-tool/wasm-pack-plugin": "1.0.1",

@@ -8,6 +8,9 @@ use wasm_bindgen::prelude::*;
 mod actions;
 mod node_bindings;
 
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 #[wasm_bindgen]
 pub struct Tasks {
     _names: ActionType,
