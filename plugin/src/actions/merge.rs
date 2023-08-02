@@ -1,7 +1,7 @@
 //! This module provides action which merges all the compiled artifacts
 //! into one with defined with args filters.
 
-use diamond_tools_core::{engine::Engine, hardhat::HardhatArtifact};
+use diamond_tools_core::{abi::abi_to_solidity, engine::Engine, hardhat::HardhatArtifact};
 use ethabi::Contract;
 use hardhat_bindings::HardhatRuntimeEnvironment;
 use hardhat_bindings_macro::TaskParameter;
@@ -17,7 +17,7 @@ pub const MERGE_DESCRIPTION: &str = r#"
     Merges all the compiled artifacts into one with defined with args filters.
 "#;
 
-#[derive(serde::Deserialize, Default, TaskParameter)]
+#[derive(serde::Deserialize, TaskParameter)]
 pub struct DiamondMergeArgs {
     /// Names of the methods that should be included/excluded to/from the merge.
     ///
@@ -34,6 +34,22 @@ pub struct DiamondMergeArgs {
     /// The contract name to use as the base contract for the diamond
     #[serde(rename = "outContractName")]
     pub out_contract_name: Option<String>,
+    /// Create solidity interface of not
+    #[serde(rename = "createInterface")]
+    pub create_interface: bool,
+}
+
+impl Default for DiamondMergeArgs {
+    fn default() -> Self {
+        Self {
+            filtered_methods: None,
+            include: false,
+            exclude: false,
+            out_dir: Some(DEFAULT_OUT_DIR.to_string()),
+            out_contract_name: Some(DEFAULT_OUT_CONTRACT_NAME.to_string()),
+            create_interface: true,
+        }
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -46,8 +62,12 @@ pub enum DiamondMergeError {
     ReadArtifact(JsValue),
     #[error("Failed to parse and get abis: {0:?}")]
     ParseAbi(JsValue),
+    #[error("Failed to create out dir: {0:?}")]
+    CreateOutDir(JsValue),
     #[error("Failed to write merged artifact: {0}")]
     WriteArtifact(#[from] WriteError),
+    #[error("Failed to create solidity interface: {0}")]
+    CreateInterface(#[from] diamond_tools_core::abi::Error),
 }
 
 const DEFAULT_OUT_DIR: &str = "artifacts/contracts";
@@ -95,40 +115,11 @@ pub async fn merge_artifacts_action(
 
     let merged = engine.finish();
 
-    write_merged(args.out_contract_name, args.out_dir, merged).await?;
-
-    Ok(())
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum WriteError {
-    #[error("Failed to form result json: {0}")]
-    FormJson(#[from] serde_json::Error),
-    #[error("Failed to create out dir: {0:?}")]
-    CreateOutDir(JsValue),
-    #[error("Failed to write result json: {0:?}")]
-    WriteJson(JsValue),
-}
-
-async fn write_merged(
-    out_contract_name: Option<String>,
-    out_dir: Option<String>,
-    merged_contract: Contract,
-) -> Result<(), WriteError> {
-    let contract_name = out_contract_name.unwrap_or_else(|| DEFAULT_OUT_CONTRACT_NAME.to_string());
-
-    let hardhat_artifact = HardhatArtifact {
-        contract_name,
-        abi: merged_contract.clone(),
-        ..Default::default()
-    };
-
-    let abi_json = serde_json::to_string_pretty(&hardhat_artifact)?;
-
-    let out_dir = out_dir.unwrap_or_else(|| DEFAULT_OUT_DIR.to_string());
-    let dir_path = format!("{}/{}.sol", out_dir, hardhat_artifact.contract_name);
-
-    log(&format!("Writing merged artifact to {}", dir_path));
+    let contract_name = args
+        .out_contract_name
+        .expect("Default contract name is set");
+    let out_dir = args.out_dir.expect("Default out dir is set");
+    let dir_path = format!("{}/{}.sol", out_dir, contract_name);
 
     fs::mkdir(
         &dir_path,
@@ -138,13 +129,52 @@ async fn write_merged(
         },
     )
     .await
-    .map_err(WriteError::CreateOutDir)?;
+    .map_err(DiamondMergeError::CreateOutDir)?;
+
+    write_merged(&contract_name, &dir_path, &merged).await?;
+
+    if !args.create_interface {
+        return Ok(());
+    }
+
+    let interface = abi_to_solidity(&merged, &contract_name)?;
+
+    log("Writing solidity interface...");
+
+    fs::write_file_sync(&format!("{}/I{}.sol", dir_path, contract_name), &interface)
+        .map_err(|e| WriteError::Write(e))?;
+
+    Ok(())
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum WriteError {
+    #[error("Failed to form result json: {0}")]
+    FormJson(#[from] serde_json::Error),
+    #[error("Failed to write result file: {0:?}")]
+    Write(JsValue),
+}
+
+async fn write_merged(
+    contract_name: &str,
+    out_dir: &str,
+    merged_contract: &Contract,
+) -> Result<(), WriteError> {
+    let hardhat_artifact = HardhatArtifact {
+        contract_name: contract_name.to_string(),
+        abi: merged_contract.clone(),
+        ..Default::default()
+    };
+
+    let abi_json = serde_json::to_string_pretty(&hardhat_artifact)?;
+
+    log(&format!("Writing merged artifact to {}", out_dir));
 
     fs::write_file_sync(
-        &format!("{}/{}.json", dir_path, hardhat_artifact.contract_name),
+        &format!("{}/{}.json", out_dir, hardhat_artifact.contract_name),
         &abi_json,
     )
-    .map_err(WriteError::WriteJson)?;
+    .map_err(WriteError::Write)?;
 
     Ok(())
 }
