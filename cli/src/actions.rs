@@ -1,6 +1,12 @@
 //! This module provides the CLI actions.
 
-use std::{ffi::OsString, fs::File, os::unix::prelude::OsStrExt, path::PathBuf};
+use std::{
+    ffi::OsString,
+    fs::{create_dir_all, File},
+    io::Write,
+    os::unix::prelude::OsStrExt,
+    path::PathBuf,
+};
 
 use diamond_tools_core::{engine::Engine, hardhat::HardhatArtifact};
 use ethabi::Contract;
@@ -16,7 +22,9 @@ pub(crate) fn merge(
         extensions,
         include,
         exclude,
-        output,
+        out_dir,
+        contract_name,
+        create_interface,
     }: MergeArgs,
 ) -> eyre::Result<()> {
     let abi_pathes = read_abi_pathes_from_dir(abis_path, follow_symlinks, extensions)?;
@@ -25,7 +33,15 @@ pub(crate) fn merge(
     let abis = read_abis(abi_pathes)?;
     log::info!("Read {} ABIs", abis.len());
 
-    merge_abis(abis, include, exclude, output)?;
+    let out_dir = out_dir.unwrap_or_else(|| DEFAULT_RESULT_DIR.into());
+
+    create_dir_all(&out_dir).wrap_err("Failed to create output directory")?;
+
+    let merged = merge_abis(abis, include, exclude, &out_dir, &contract_name)?;
+
+    if create_interface {
+        create_and_write_interface(&merged, &out_dir, &contract_name)?;
+    }
 
     Ok(())
 }
@@ -131,15 +147,16 @@ fn read_abi(path: PathBuf) -> eyre::Result<Contract> {
     Ok(hardhat_abi.abi)
 }
 
-const DEFAULT_RESULT_FILE: &str = "DiamondProxy.abi";
+const DEFAULT_RESULT_DIR: &str = "artifacts";
 
 /// Merge the abis and write the result to the given path.
 fn merge_abis(
     abis: Vec<Contract>,
     includes: Option<Vec<String>>,
     excludes: Option<Vec<String>>,
-    output: Option<PathBuf>,
-) -> eyre::Result<()> {
+    out_dir: &PathBuf,
+    contract_name: &str,
+) -> eyre::Result<Contract> {
     let engine = Engine::new(abis);
 
     let mut engine = if let Some(includes) = includes {
@@ -153,11 +170,31 @@ fn merge_abis(
     engine.merge();
 
     let abi = engine.finish();
-    let output = output.unwrap_or_else(|| DEFAULT_RESULT_FILE.into());
+
+    let output = out_dir.join(format!("{}.json", contract_name));
+
     let file = File::create(output).wrap_err("Failed to create output file")?;
     let writer = std::io::BufWriter::new(file);
 
     serde_json::to_writer(writer, &abi).wrap_err("Failed to write ABI file")?;
+
+    Ok(abi)
+}
+
+/// Create the interface for the given ABI.
+fn create_and_write_interface(
+    abi: &Contract,
+    out_dir: &PathBuf,
+    contract_name: &str,
+) -> eyre::Result<()> {
+    let interface = diamond_tools_core::abi::abi_to_solidity(&abi, "DiamondProxy")?;
+
+    let output = out_dir.join(format!("I{}.sol", contract_name));
+
+    let mut file = File::create(output).wrap_err("Failed to create output file")?;
+
+    file.write_all(interface.as_bytes())
+        .wrap_err("Failed to write interface file")?;
 
     Ok(())
 }

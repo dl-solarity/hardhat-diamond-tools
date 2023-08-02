@@ -15,13 +15,21 @@ pub(crate) struct MergeArgs {
     #[arg(short, long, group = "filter")]
     pub(crate) exclude: Option<Vec<String>>,
 
+    /// Create solidity interface or not
+    #[arg(long)]
+    pub(crate) create_interface: bool,
+
     /// Whether to follow symlinks when reading ABIs from a directory.
     #[arg(short, long)]
     pub(crate) follow_symlinks: bool,
 
-    /// The path to the output file.
+    /// The path to the output directory.
     #[arg(short, long)]
-    pub(crate) output: Option<PathBuf>,
+    pub(crate) out_dir: Option<PathBuf>,
+
+    /// The result contract name
+    #[arg(long, default_value = "DiamondProxy")]
+    pub(crate) contract_name: String,
 
     /// A list of possible file extensions to read ABIs from.
     #[arg(long, default_value = "json")]
