@@ -32,6 +32,24 @@ extern "C" {
         this: &ConfigurableTaskDefinition,
         action: &ActionType,
     ) -> ConfigurableTaskDefinition;
+
+    #[wasm_bindgen(method, js_name = "addParam")]
+    pub fn add_param(
+        this: &ConfigurableTaskDefinition,
+        name: &str,
+        description: &str,
+        default_value: JsValue,
+        is_optional: bool,
+    ) -> ConfigurableTaskDefinition;
+
+    #[wasm_bindgen(method, js_name = "addVariadicPositionalParam")]
+    pub fn add_variadic_positional_param(
+        this: &ConfigurableTaskDefinition,
+        name: &str,
+        description: &str,
+        default_value: JsValue,
+        is_optional: bool,
+    ) -> ConfigurableTaskDefinition;
 }
 
 #[wasm_bindgen(module = "hardhat/config")]
