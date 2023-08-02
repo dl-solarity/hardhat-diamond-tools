@@ -1,5 +1,5 @@
 [toolchain]
-channel = "nightly-2023-06-01"                               # for some optimizations
+channel = "nightly-2023-06-02"                               # for some optimizations
 components = ["clippy", "rustfmt", "rust-src"]
 targets = ["wasm32-unknown-unknown", "aarch64-apple-darwin"]
 profile = "minimal"

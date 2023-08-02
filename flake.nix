@@ -31,6 +31,8 @@
           overlays = [ (import rust-overlay) ];
         };
 
+        foundryPkg = pkgs.callPackage ./nix/foundry { inherit pkgs system; };
+
         rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
         craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
 
@@ -65,6 +67,7 @@
             rust-analyzer
             nixfmt
             rnix-lsp
+            foundryPkg
             nodePackages.typescript-language-server
           ];
 
