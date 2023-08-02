@@ -1,7 +1,8 @@
 //! This module provides simple example action which gets all the
 //! compiled artifacts and prints their fully qualified names.
 
-use hardhat_bindings_macro::hardhat_action;
+use hardhat_bindings::HardhatRuntimeEnvironment;
+use hardhat_bindings_macro::TaskParameter;
 use wasm_bindgen::JsValue;
 
 use crate::node_bindings::log;
@@ -11,7 +12,7 @@ pub const NAMES_DESCRIPTION: &str = r#"
     Prints all the fully qualified names of the compiled artifacts.
 "#;
 
-#[derive(serde::Deserialize, Default)]
+#[derive(serde::Deserialize, Default, TaskParameter)]
 pub struct NamesArgs {}
 
 #[derive(Debug, thiserror::Error)]
@@ -20,9 +21,8 @@ pub enum NamesError {
     GetAllFullyQualifiedNames(JsValue),
 }
 
-#[hardhat_action]
 pub async fn names_action(
-    args: NamesArgs,
+    _args: NamesArgs,
     hre: HardhatRuntimeEnvironment,
 ) -> Result<(), NamesError> {
     let artifacts = hre.artifacts();

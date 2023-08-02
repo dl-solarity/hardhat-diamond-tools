@@ -6,6 +6,10 @@ edition = "2021"
 [lib]
 proc-macro = true
 
+[[test]]
+name = "params_derive"
+path = "tests/test_params_derive.rs"
+
 [dependencies]
 hardhat-bindings = { path = "../hardhat-bindings" }
 

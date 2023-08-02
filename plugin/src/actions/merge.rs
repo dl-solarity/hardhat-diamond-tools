@@ -1,9 +1,10 @@
 //! This module provides action which merges all the compiled artifacts
 //! into one with defined with args filters.
 
-use diamond_tools_core::{engine::Engine, filter::IncludeExcludeFilter, hardhat::HardhatArtifact};
+use diamond_tools_core::{engine::Engine, hardhat::HardhatArtifact};
 use ethabi::Contract;
-use hardhat_bindings_macro::hardhat_action;
+use hardhat_bindings::HardhatRuntimeEnvironment;
+use hardhat_bindings_macro::TaskParameter;
 use wasm_bindgen::JsValue;
 
 use crate::node_bindings::{
@@ -16,9 +17,9 @@ pub const MERGE_DESCRIPTION: &str = r#"
     Merges all the compiled artifacts into one with defined with args filters.
 "#;
 
-#[derive(serde::Deserialize, Default)]
+#[derive(serde::Deserialize, Default, TaskParameter)]
 pub struct DiamondMergeArgs {
-    pub filter: Option<IncludeExcludeFilter>,
+    // pub filter: Option<IncludeExcludeFilter>,
     #[serde(rename = "outDir")]
     pub out_dir: Option<String>,
     /// The contract name to use as the base contract for the diamond
@@ -41,7 +42,6 @@ pub enum DiamondMergeError {
 const DEFAULT_OUT_DIR: &str = "artifacts/contracts";
 const DEFAULT_OUT_CONTRACT_NAME: &str = "DiamondProxy";
 
-#[hardhat_action]
 pub async fn merge_artifacts_action(
     args: DiamondMergeArgs,
     hre: HardhatRuntimeEnvironment,
@@ -66,7 +66,8 @@ pub async fn merge_artifacts_action(
 
     log("Merging artifacts...");
 
-    let mut engine = Engine::new(abis).with_filter(args.filter.unwrap_or_default());
+    let mut engine = Engine::new(abis);
+    // .with_filter(args.filter.unwrap_or_default());
 
     engine.merge();
 

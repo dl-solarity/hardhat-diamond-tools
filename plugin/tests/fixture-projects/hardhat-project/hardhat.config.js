@@ -8,7 +8,7 @@ module.exports = {
       },
     ],
   },
-  merge: {
+  diamondMerge: {
     outDir: "artifacts/merged",
     outContractName: "DiamondProxy",
     filter: {

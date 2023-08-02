@@ -9,6 +9,7 @@ wasm-bindgen = { version = "=0.2.84", default-features = false }
 js-sys = "0.3.61"
 wasm-bindgen-futures = "0.4.34"
 serde-wasm-bindgen = "0.5.0"
+thiserror = { version = "1.0.44", default-features = false }
 
 # TODO(Velnbur): Remove this once the [PR](https://github.com/rust-ethereum/ethabi/pull/298) is merged.
 [workspace.dependencies.ethabi]

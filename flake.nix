@@ -60,6 +60,7 @@
             wasm-bindgen-cli
             nodejs
             cargo-generate
+            cargo-expand
             binaryen
           ];
 

@@ -21,11 +21,10 @@ pub struct Tasks {
 /// in [`hardhat.config.js`] and here all tasks will be created.
 #[wasm_bindgen]
 pub fn run() -> Tasks {
-    let names_action_cb = Closure::new(actions::names::names_action);
-    let merge_action_cb = Closure::new(actions::merge::merge_artifacts_action);
-
-    task(NAMES_TASK, NAMES_DESCRIPTION).set_action(&names_action_cb);
-    task(MERGE_TASK, MERGE_DESCRIPTION).set_action(&merge_action_cb);
+    let names_action_cb =
+        task(NAMES_TASK, NAMES_DESCRIPTION).set_action(actions::names::names_action);
+    let merge_action_cb =
+        task(MERGE_TASK, MERGE_DESCRIPTION).set_action(actions::merge::merge_artifacts_action);
 
     Tasks {
         _names: names_action_cb,
