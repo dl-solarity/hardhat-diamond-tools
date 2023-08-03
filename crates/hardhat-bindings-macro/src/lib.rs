@@ -23,12 +23,21 @@ mod params;
 /// ```rust
 /// #[derive(Default)]
 /// pub struct TaskArgs {
-///    /// The name for the task
-///    pub name: String,
-///    /// Some flag
-///    pub flag: bool,
-///    /// An optional description param
-///    pub optional_description: Option<String>,
+///     /// Small doc
+///     pub flag: bool,
+///     /// Big doc
+///     ///
+///     /// With multiple lines
+///     pub flag1: bool,
+///     /// Big doc
+///     ///
+///     /// With multiple lines
+///     ///
+///     /// And even more
+///     pub name: String,
+///     pub optional: Option<String>,
+///     pub variadic: Vec<String>,
+///     pub optional_variadic: Option<Vec<String>>,
 /// }
 ///
 /// use wasm_bindgen::prelude::JsValue;
@@ -39,10 +48,41 @@ mod params;
 ///     ) -> ::hardhat_bindings::bindings::config::ConfigurableTaskDefinition {
 ///         let default = Self::default();
 ///
-///         task.add_param("name", "The name for the task", JsValue::from(default.name), false);
-///         task.add_param("flag", "Some flag", JsValue::from(default.flag), false);
-///         task.add_param("optional_description", "An optional description param", JsValue::from(default.optional_description), true);
-///
+///         task.add_flag("flag", "Small doc\n", default.flag);
+///         task.add_flag("flag1", "Big doc\n\nWith multiple lines\n", default.flag1);
+///         task.add_param(
+///             "name",
+///             "Big doc\n\nWith multiple lines\n\nAnd even more\n",
+///             ::wasm_bindgen::JsValue::from(default.name.clone()),
+///         );
+///         task.add_optional_param(
+///             "optional",
+///             "",
+///             ::wasm_bindgen::JsValue::from(default.optional),
+///         );
+///         {
+///             let mut __array = ::js_sys::Array::new();
+///             for value in default.variadic {
+///                 __array.push(&::wasm_bindgen::JsValue::from(value));
+///             }
+///             task.add_variadic_positional_param("variadic", "", __array.into());
+///         };
+///         {
+///             let mut __default = if let Some(__values) = default.optional_variadic {
+///                 let mut __array = ::js_sys::Array::new();
+///                 for value in __values {
+///                     __array.push(&::wasm_bindgen::JsValue::from(value));
+///                 }
+///                 __array.into()
+///             } else {
+///                 ::js_sys::Array::new().into()
+///             };
+///             task.add_optional_variadic_positional_param(
+///                 "optionalVariadic",
+///                 "",
+///                 __default,
+///             );
+///         };
 ///         task
 ///     }
 /// }
