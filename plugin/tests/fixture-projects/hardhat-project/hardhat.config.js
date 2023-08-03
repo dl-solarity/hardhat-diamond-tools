@@ -1,4 +1,4 @@
-require("../../../index")
+require("../../../pkg")
 
 module.exports = {
   solidity: {
