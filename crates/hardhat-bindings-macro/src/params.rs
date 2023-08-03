@@ -21,12 +21,10 @@ fn gen_task_parameter_for_struct(
 ) -> Result<TokenStream, syn::Error> {
     match struct_type.fields {
         syn::Fields::Named(fields) => gen_task_parameter_for_named_fields(fields, ident),
-        _ => {
-            return Err(syn::Error::new_spanned(
-                struct_type.struct_token,
-                "Only named fields are supported",
-            ))
-        }
+        _ => Err(syn::Error::new_spanned(
+            struct_type.struct_token,
+            "Only named fields are supported",
+        )),
     }
 }
 
@@ -53,8 +51,7 @@ fn gen_task_parameter_for_named_fields(
                 task
             }
         }
-    }
-    .into())
+    })
 }
 
 fn gen_task_call_for_field(field: &syn::Field) -> Result<TokenStream, syn::Error> {
@@ -126,8 +123,7 @@ fn gen_task_call_for_field(field: &syn::Field) -> Result<TokenStream, syn::Error
                 default.#name,
             );
         },
-    }
-    .into())
+    })
 }
 
 pub enum VariadicParamType {

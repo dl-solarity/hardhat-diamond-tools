@@ -142,7 +142,7 @@ pub async fn merge_artifacts_action(
     log("Writing solidity interface...");
 
     fs::write_file_sync(&format!("{}/I{}.sol", dir_path, contract_name), &interface)
-        .map_err(|e| WriteError::Write(e))?;
+        .map_err(WriteError::Write)?;
 
     Ok(())
 }

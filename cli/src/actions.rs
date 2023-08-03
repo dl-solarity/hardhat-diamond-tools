@@ -5,7 +5,7 @@ use std::{
     fs::{create_dir_all, File},
     io::Write,
     os::unix::prelude::OsStrExt,
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 use diamond_tools_core::{engine::Engine, hardhat::HardhatArtifact};
@@ -55,7 +55,7 @@ fn read_abi_pathes_from_dir(
 ) -> eyre::Result<Vec<PathBuf>> {
     let extensions = extensions
         .into_iter()
-        .map(|ext| OsString::from(ext))
+        .map(OsString::from)
         .collect::<Vec<_>>();
 
     let walker = WalkDir::new(path)
@@ -87,7 +87,7 @@ fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .map(|s| s.starts_with("."))
+        .map(|s| s.starts_with('.'))
         .unwrap_or(false)
 }
 
@@ -116,7 +116,7 @@ fn is_dbg_file(entry: &DirEntry) -> bool {
         .file_stem()
         .map(|s| {
             // Check that slice is not less than the `DBG_SUFIX`.
-            !(s.len() <= DBG_SUFIX.len())
+            s.len() > DBG_SUFIX.len()
             // Check that slice ends with `DBG_SUFIX`.
                 && s.as_bytes()[s.len()-DBG_SUFIX.len()..] == DBG_SUFIX.as_bytes()[..]
         })
@@ -154,7 +154,7 @@ fn merge_abis(
     abis: Vec<Contract>,
     includes: Option<Vec<String>>,
     excludes: Option<Vec<String>>,
-    out_dir: &PathBuf,
+    out_dir: &Path,
     contract_name: &str,
 ) -> eyre::Result<Contract> {
     let engine = Engine::new(abis);
@@ -184,10 +184,10 @@ fn merge_abis(
 /// Create the interface for the given ABI.
 fn create_and_write_interface(
     abi: &Contract,
-    out_dir: &PathBuf,
+    out_dir: &Path,
     contract_name: &str,
 ) -> eyre::Result<()> {
-    let interface = diamond_tools_core::abi::abi_to_solidity(&abi, "DiamondProxy")?;
+    let interface = diamond_tools_core::abi::abi_to_solidity(abi, "DiamondProxy")?;
 
     let output = out_dir.join(format!("I{}.sol", contract_name));
 

@@ -291,14 +291,14 @@ fn format_event_params(
     structs: &InternalStructs,
 ) -> String {
     let kind = expand_event_param_type(event, &param.kind, idx, structs);
-    let ty = if param.name.is_empty() {
+
+    if param.name.is_empty() {
         kind
     } else if param.indexed {
         format!("{kind} indexed {}", param.name)
     } else {
         format!("{kind} {}", param.name)
-    };
-    ty
+    }
 }
 
 /// Returns all struct type defs
