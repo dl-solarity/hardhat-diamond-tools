@@ -27,8 +27,14 @@ jobs:
         run: nix build .#plugin
       # Setup .npmrc file to publish to GitHub Packages
       - name: Setup `.npmrc`
-        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+        run: |
+          cat > ~/.npmrc <<EOF
+          //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}
+          @dlsl:registry=https://npm.pkg.github.com/dlsl-diamond-tool
+          always-auth=true
       - name: Publish to GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           nix develop --accept-flake-config ${{ matrix.nixpkgs-override }}
           cd result/pkg
