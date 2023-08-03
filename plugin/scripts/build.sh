@@ -41,7 +41,7 @@ EOF
 cp $PLUGIN_SRC_DIR/README.md $PLUGIN_OUT_DIR
 
 # copy `readme`, `name`, `description, `version`, `license` from `package.json` to `pkg/package.json`
-cat $PLUGIN_SRC_DIR/package.json | jq '. | {readme, name, description, version, license}' > $PLUGIN_OUT_DIR/package.json
+cat $PLUGIN_SRC_DIR/package.json | jq '. | {readme, name, description, version, license, repository}' > $PLUGIN_OUT_DIR/package.json
 
 # add `main` field to `pkg/package.json` using jq
 cat $PLUGIN_OUT_DIR/package.json | jq '. + {main: "index.js"}' > $PLUGIN_OUT_DIR/package.json.tmp
