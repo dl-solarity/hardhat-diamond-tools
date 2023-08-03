@@ -41,7 +41,6 @@
         src = with pkgs; lib.cleanSourceWith {
           src = ./.; # The original, unfiltered source
           filter = path: type:
-            (lib.hasSuffix "\.js" path) ||
             # Default filter from crane (allow .rs files)
             (craneLib.filterCargoSources path type)
           ;
@@ -67,27 +66,54 @@
           cargoExtraArgs = "--package=${pname}";
         });
 
-        wasmArgs = commonArgs // rec {
-          pname = "diamond-tools-plugin";
-          cargoExtraArgs = "--package=${pname}";
+        wasmArgs = commonArgs // {
+          inherit src;
+          pname = "hardhat-diamond-tools";
+          cargoExtraArgs = "--package=diamond-tools-plugin";
           CARGO_BUILD_TARGET = "wasm32-unknown-unknown";
-
-          buildInputs = with pkgs; [
-            wasm-pack
-            wasm-bindgen-cli
-            nodejs
-            cargo-generate
-            cargo-expand
-            binaryen
-          ];
         };
 
         wasmArtifacts = craneLib.buildDepsOnly (wasmArgs // {
           doCheck = false;
         });
 
-        plugin = craneLib.buildPackage (wasmArgs // {
+        pluginSrc = with pkgs; lib.cleanSourceWith {
+          src = ./.; # The original, unfiltered source
+          filter = path: type:
+            (lib.hasSuffix "\.js" path) || # For plugin javascript
+            (lib.hasSuffix "\.json" path) || # For package.json
+            (lib.hasSuffix "\.sh" path) || # For scripts
+            (lib.hasSuffix "\.ts" path) || # For typescript files in plugin
+            (lib.hasSuffix "README.md" path) ||
+            # Default filter from crane (allow .rs files)
+            (craneLib.filterCargoSources path type)
+          ;
+        };
+
+        pluginBuildInputs = with pkgs; [
+          wasm-bindgen-cli
+          jq
+        ];
+
+        plugin = craneLib.mkCargoDerivation (wasmArgs // rec {
+          src = pluginSrc; # replace src with filtered source
           cargoArtifacts = wasmArtifacts;
+          cargoExtraArgs = "";
+          doCheck = false;
+
+          preConfigure = ''
+            export PLUGIN_OUT_DIR=$out/pkg
+            export PLUGIN_WASM_FILE=target/wasm32-unknown-unknown/debug/diamond_tools_plugin.wasm
+            export PLUGIN_SRC_DIR=$src/plugin
+          '';
+
+          buildPhaseCargoCommand = ''
+            mkdir -p $PLUGIN_OUT_DIR
+
+            bash $src/plugin/scripts/build.sh
+          '';
+
+          buildInputs = pluginBuildInputs;
         });
       in
       rec {
@@ -139,12 +165,13 @@
           ] ++ commonArgs.nativeBuildInputs;
 
           buildInputs = with pkgs; [
+            cargo-expand
             rust-analyzer
             nixfmt
             rnix-lsp
             foundryPkg
             nodePackages.typescript-language-server
-          ] ++ wasmArgs.buildInputs;
+          ] ++ pluginBuildInputs;
 
           shellHook = ''
             # For rust-analyzer 'hover' tooltips to work.

@@ -19,6 +19,12 @@ git = "https://github.com/al8n/ethabi"
 rev = "3decaeaf6fd716d1623d7d0682ece1c78e1f4f50"
 features = ["serde"]
 
+[workspace.package]
+version = "0.1.0"
+authors = ["Velnbur"]
+readme = "README.md"
+license-file = "LICENSE"
+
 [profile.release]
 opt-level = "z"
 lto = true
