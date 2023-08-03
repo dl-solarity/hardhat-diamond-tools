@@ -9,6 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
+    strategy:
+      matrix:
+        include:
+          - install_url: https://releases.nixos.org/nix/nix-2.13.3/install
+            nixpkgs-override: "--override-input nixpkgs github:NixOS/nixpkgs/release-23.05"
     steps:
       - uses: cachix/install-nix-action@v22
         with:
@@ -24,4 +29,5 @@ jobs:
       - name: Setup `.npmrc`
         run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
       - name: Publish to GitHub Packages
-        run: nix-shell -p nodejs --command "npm publish"
+        working-directory: result/pkg
+        run: nix develop --accept-flake-config ${{ matrix.nixpkgs-override }} --command "npm publish"
