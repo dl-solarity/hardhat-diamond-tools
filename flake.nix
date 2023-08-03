@@ -157,26 +157,33 @@
 
         formatter = pkgs.nixpkgs-fmt;
 
-        devShells.default = pkgs.mkShell {
-          inputsFrom = builtins.attrValues self.checks.${system};
+        devShells = {
+          publish = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              nodejs
+            ];
+          };
+          default = pkgs.mkShell {
+            inputsFrom = builtins.attrValues self.checks.${system};
 
-          nativeBuildInputs = [
-            rustToolchain
-          ] ++ commonArgs.nativeBuildInputs;
+            nativeBuildInputs = [
+              rustToolchain
+            ] ++ commonArgs.nativeBuildInputs;
 
-          buildInputs = with pkgs; [
-            cargo-expand
-            rust-analyzer
-            nixfmt
-            rnix-lsp
-            foundryPkg
-            nodePackages.typescript-language-server
-          ] ++ pluginBuildInputs;
+            buildInputs = with pkgs; [
+              cargo-expand
+              rust-analyzer
+              nixfmt
+              rnix-lsp
+              foundryPkg
+              nodePackages.typescript-language-server
+            ] ++ pluginBuildInputs;
 
-          shellHook = ''
-            # For rust-analyzer 'hover' tooltips to work.
-            export RUST_SRC_PATH=${pkgs.rustPlatform.rustLibSrc}
-          '';
+            shellHook = ''
+              # For rust-analyzer 'hover' tooltips to work.
+              export RUST_SRC_PATH=${pkgs.rustPlatform.rustLibSrc}
+            '';
+          };
         };
       }
     );
