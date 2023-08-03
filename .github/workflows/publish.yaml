@@ -30,7 +30,7 @@ jobs:
         run: |
           cat > ~/.npmrc <<EOF
           //npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}
-          @dlsl:registry=https://npm.pkg.github.com/dlsl-diamond-tool
+          @dlsl:registry=https://npm.pkg.github.com
           always-auth=true
       - name: Publish to GitHub Packages
         env:
