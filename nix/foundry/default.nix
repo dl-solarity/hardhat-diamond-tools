@@ -12,7 +12,7 @@ let
   };
   sha256Map = with pkgs; {
     "x86_64-darwin" = lib.fakeSha256;
-    "x86_64-linux" = lib.fakeSha256;
+    "x86_64-linux" = "sha256-+yooQpkLQffJuF26iP8tJU01p8r4JCNl7WTkmdw+13Q=";
     "aarch64-linux" = lib.fakeSha256;
     "aarch64-darwin" = "sha256-AEzjF62Zhv9AxQ7qi+n/616iaeFZ52j+BCdWD2+Tu1A=";
   };
