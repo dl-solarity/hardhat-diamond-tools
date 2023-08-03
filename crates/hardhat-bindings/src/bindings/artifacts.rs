@@ -1,4 +1,3 @@
-
 use wasm_bindgen::prelude::*;
 
 /// The [`Artifacts`] bindings for Rust.
