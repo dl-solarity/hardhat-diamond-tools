@@ -9,7 +9,7 @@ use super::runtime::HardhatRuntimeEnvironment;
 /// The [`ActionType`] bindings for Rust.
 ///
 /// NOTE: First value if the arguments of the task defined by plugin developer, that's why
-/// we use `any` (see [`JsValue`]). The third one `runSuper`.
+/// we use `any` (see [`JsValue`]).
 ///
 /// [`ActionType`]: https://github.com/NomicFoundation/hardhat/blob/main/packages/hardhat-core/src/types/runtime.ts#L161
 pub type ActionType = Closure<dyn Fn(JsValue, HardhatRuntimeEnvironment) -> Promise>;
