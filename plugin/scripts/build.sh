@@ -2,15 +2,26 @@
 #
 # Build script for plugin.
 
+set -e
+
 # if PLUGIN_OUT_DIR is not set, set it to `pkg`
 if [ -z "$PLUGIN_OUT_DIR" ]; then
   PLUGIN_OUT_DIR=pkg
 fi
 echo "PLUGIN_OUT_DIR: $PLUGIN_OUT_DIR"
 
+# if PLUGIN_RELEASE is not set, set it to `false`
+if [ -z "$PLUGIN_RELEASE" ]; then
+  PLUGIN_RELEASE=false
+fi
+
 # if PLUGIN_WASM_FILE is not set, set it to defualt
 if [ -z "$PLUGIN_WASM_FILE" ]; then
-    PLUGIN_WASM_FILE=../target/wasm32-unknown-unknown/debug/diamond_tools_plugin.wasm
+    folder="debug"
+    if [ "$PLUGIN_RELEASE" = true ] ; then
+      folder="release"
+    fi
+    PLUGIN_WASM_FILE=../target/wasm32-unknown-unknown/$folder/diamond_tools_plugin.wasm
 fi
 echo "PLUGIN_WASM_FILE: $PLUGIN_WASM_FILE"
 
@@ -19,17 +30,33 @@ if [ -z "$PLUGIN_SRC_DIR" ]; then
   PLUGIN_SRC_DIR=$(pwd)
 fi
 
-# if PLUGIN_CARG
+cargo_params=""
+if [ "$PLUGIN_RELEASE" = true ] ; then
+  cargo_params="--release"
+fi
 
 # build wasm
-# NOTE: cargo build --release -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort --target wasm32-unknown-unknown
-cargo build --package=diamond-tools-plugin --target wasm32-unknown-unknown --message-format json-render-diagnostics
+# NOTE: cargo build --release 
+cargo build \
+  --package=diamond-tools-plugin \
+  --target wasm32-unknown-unknown \
+  --message-format json-render-diagnostics \
+  -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort --target wasm32-unknown-unknown \
+  $cargo_params
 
 # build js files for wasm
 wasm-bindgen \
     --target nodejs \
     --out-dir $PLUGIN_OUT_DIR \
     $PLUGIN_WASM_FILE
+
+# optimize wasm using `wasm-opt`
+if [ "$PLUGIN_RELEASE" = true ] ; then
+  wasm-opt \
+    -Oz \
+    -o $PLUGIN_OUT_DIR/diamond_tools_plugin_bg.wasm \
+    $PLUGIN_OUT_DIR/diamond_tools_plugin_bg.wasm
+fi
 
 # copy `index.js` template to `pkg`
 cat > $PLUGIN_OUT_DIR/index.js << EOF

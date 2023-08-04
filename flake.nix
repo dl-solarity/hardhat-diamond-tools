@@ -92,6 +92,7 @@
         };
 
         pluginBuildInputs = with pkgs; [
+          binaryen
           wasm-bindgen-cli
           jq
         ];
@@ -106,6 +107,7 @@
             export PLUGIN_OUT_DIR=$out/pkg
             export PLUGIN_WASM_FILE=target/wasm32-unknown-unknown/debug/diamond_tools_plugin.wasm
             export PLUGIN_SRC_DIR=$src/plugin
+            export PLUGIN_RELEASE=true
           '';
 
           buildPhaseCargoCommand = ''
