@@ -74,9 +74,10 @@
         };
 
         wasmArtifacts = craneLib.buildDepsOnly (wasmArgs // {
-          doCheck = false;
+          doCheck = false; # tests does not work in wasm
         });
 
+        # Required to not rebuild the artifacts when `.js` files change
         pluginSrc = with pkgs; lib.cleanSourceWith {
           src = ./.; # The original, unfiltered source
           filter = path: type:
