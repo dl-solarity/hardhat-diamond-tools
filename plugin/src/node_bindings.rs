@@ -1,16 +1,9 @@
-use wasm_bindgen::prelude::wasm_bindgen;
-
-/// `console.log` for rust.
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    pub fn log(s: &str);
-}
-
 pub mod fs {
+    use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+
     #[wasm_bindgen]
     #[derive(Debug, Clone)]
-    pub struct MkdirOptions {
+    pub(crate) struct MkdirOptions {
         pub recursive: bool,
         pub mode: u32,
     }
@@ -24,8 +17,6 @@ pub mod fs {
         }
     }
 
-    use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
-
     /// `fs` module of `nodejs` for usage in rust.
     #[wasm_bindgen(module = "node:fs")]
     extern "C" {
@@ -36,6 +27,6 @@ pub mod fs {
     #[wasm_bindgen(module = "node:fs/promises")]
     extern "C" {
         #[wasm_bindgen(js_name = mkdir, catch)]
-        pub async fn mkdir(path: &str, options: MkdirOptions) -> Result<(), JsValue>;
+        pub(crate) async fn mkdir(path: &str, options: MkdirOptions) -> Result<(), JsValue>;
     }
 }

@@ -24,5 +24,8 @@ diamond-tools-core = { path = "../crates/core" }
 thiserror = { version = "1.0.44", default-features = false }
 wee_alloc = "0.4.5"
 
+log = { workspace = true }
+console_log = "1.0.0"
+
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"

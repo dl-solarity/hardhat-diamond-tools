@@ -7,10 +7,7 @@ use hardhat_bindings::HardhatRuntimeEnvironment;
 use hardhat_bindings_macro::TaskParameter;
 use wasm_bindgen::JsValue;
 
-use crate::node_bindings::{
-    fs::{self, MkdirOptions},
-    log,
-};
+use crate::node_bindings::fs::{self, MkdirOptions};
 
 pub const MERGE_TASK: &str = "diamond:merge";
 pub const MERGE_DESCRIPTION: &str = r#"
@@ -95,7 +92,7 @@ pub async fn merge_artifacts_action(
         .collect::<Result<Vec<_>, _>>()
         .map_err(DiamondMergeError::ParseAbi)?;
 
-    log("Merging artifacts...");
+    log::info!("Merging abis...");
 
     let mut engine = Engine::new(abis);
 
@@ -139,7 +136,7 @@ pub async fn merge_artifacts_action(
 
     let interface = abi_to_solidity(&merged, &contract_name)?;
 
-    log("Writing solidity interface...");
+    log::info!("Writing solidity interface...");
 
     fs::write_file_sync(&format!("{}/I{}.sol", dir_path, contract_name), &interface)
         .map_err(WriteError::Write)?;
@@ -168,7 +165,7 @@ async fn write_merged(
 
     let abi_json = serde_json::to_string_pretty(&hardhat_artifact)?;
 
-    log(&format!("Writing merged artifact to {}", out_dir));
+    log::info!("Writing merged artifact to {}", out_dir);
 
     fs::write_file_sync(
         &format!("{}/{}.json", out_dir, hardhat_artifact.contract_name),

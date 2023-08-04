@@ -18,5 +18,6 @@ serde_json = { workspace = true }
 clap = { version = "4.3.17", features = ["derive"] }
 eyre = "0.6.8"
 walkdir = "2.3.3"
-log = "0.4.19"
+
+log = { workspace = true }
 simplelog = "0.12.1"

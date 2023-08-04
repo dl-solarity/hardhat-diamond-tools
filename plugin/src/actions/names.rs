@@ -5,8 +5,6 @@ use hardhat_bindings::HardhatRuntimeEnvironment;
 use hardhat_bindings_macro::TaskParameter;
 use wasm_bindgen::JsValue;
 
-use crate::node_bindings::log;
-
 pub const NAMES_TASK: &str = "names";
 pub const NAMES_DESCRIPTION: &str = r#"
     Prints all the fully qualified names of the compiled artifacts.
@@ -27,7 +25,7 @@ pub async fn names_action(
 ) -> Result<(), NamesError> {
     let artifacts = hre.artifacts();
 
-    log("All artifacts:");
+    log::info!("All artifacts:");
 
     let names = artifacts
         .get_all_fully_qualified_names()
@@ -35,7 +33,7 @@ pub async fn names_action(
         .map_err(NamesError::GetAllFullyQualifiedNames)?;
 
     for name in names {
-        log(&name);
+        log::info!("{}", name);
     }
 
     Ok(())

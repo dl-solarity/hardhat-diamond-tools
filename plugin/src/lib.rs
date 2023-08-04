@@ -21,6 +21,8 @@ pub struct Tasks {
 /// in [`hardhat.config.js`] and here all tasks will be created.
 #[wasm_bindgen]
 pub fn run() -> Tasks {
+    console_log::init().expect("Logger should always be initialized");
+
     let names_action_cb =
         task(NAMES_TASK, NAMES_DESCRIPTION).set_action(actions::names::names_action);
     let merge_action_cb =
