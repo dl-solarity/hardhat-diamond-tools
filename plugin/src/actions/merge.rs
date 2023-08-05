@@ -1,7 +1,10 @@
 //! This module provides action which merges all the compiled artifacts
 //! into one with defined with args filters.
 
-use diamond_tools_core::{abi::abi_to_solidity, engine::Engine, hardhat::HardhatArtifact};
+use diamond_tools_core::{
+    abi::abi_to_solidity, filter::IncludeExcludeFilter, hardhat::HardhatArtifact,
+    merger::DiamondMerger,
+};
 use ethabi::Contract;
 use hardhat_bindings::HardhatRuntimeEnvironment;
 use hardhat_bindings_macro::TaskParameter;
@@ -94,23 +97,21 @@ pub async fn merge_artifacts_action(
 
     log::info!("Merging abis...");
 
-    let mut engine = Engine::new(abis);
-
-    if let Some(filters) = args.filtered_methods {
+    let filters = if let Some(filter_set) = args.filtered_methods {
         if args.include && args.exclude {
             return Err(DiamondMergeError::OnlyOneFilter);
         }
 
         if args.include {
-            engine = engine.with_include(filters);
-        } else if args.exclude {
-            engine = engine.with_exclude(filters);
+            IncludeExcludeFilter::from_include(filter_set)
+        } else {
+            IncludeExcludeFilter::from_exclude(filter_set)
         }
-    }
+    } else {
+        IncludeExcludeFilter::default()
+    };
 
-    engine.merge();
-
-    let merged = engine.finish();
+    let merged = DiamondMerger::new(filters).merge(abis);
 
     let contract_name = args
         .out_contract_name
@@ -128,7 +129,7 @@ pub async fn merge_artifacts_action(
     .await
     .map_err(DiamondMergeError::CreateOutDir)?;
 
-    write_merged(&contract_name, &dir_path, &merged).await?;
+    write_merged(&contract_name, &dir_path, &merged)?;
 
     if !args.create_interface {
         return Ok(());
@@ -152,7 +153,7 @@ pub enum WriteError {
     Write(JsValue),
 }
 
-async fn write_merged(
+fn write_merged(
     contract_name: &str,
     out_dir: &str,
     merged_contract: &Contract,

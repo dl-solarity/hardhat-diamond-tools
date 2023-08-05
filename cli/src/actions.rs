@@ -8,7 +8,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use diamond_tools_core::{engine::Engine, hardhat::HardhatArtifact};
+use diamond_tools_core::{
+    filter::IncludeExcludeFilter, hardhat::HardhatArtifact, merger::DiamondMerger,
+};
 use ethabi::Contract;
 use eyre::Context;
 use walkdir::{DirEntry, WalkDir};
@@ -157,19 +159,15 @@ fn merge_abis(
     out_dir: &Path,
     contract_name: &str,
 ) -> eyre::Result<Contract> {
-    let engine = Engine::new(abis);
-
-    let mut engine = if let Some(includes) = includes {
-        engine.with_include(includes)
+    let filter = if let Some(includes) = includes {
+        IncludeExcludeFilter::from_include(includes)
     } else if let Some(excludes) = excludes {
-        engine.with_exclude(excludes)
+        IncludeExcludeFilter::from_exclude(excludes)
     } else {
-        engine
+        IncludeExcludeFilter::default()
     };
 
-    engine.merge();
-
-    let abi = engine.finish();
+    let abi = DiamondMerger::new(filter).merge(abis);
 
     let output = out_dir.join(format!("{}.json", contract_name));
 

@@ -2,6 +2,16 @@ use std::collections::BTreeSet;
 
 use ethabi::Function;
 
+pub trait FunctionsFilter {
+    fn filter_functions(&self, signature: &str, func: &Function) -> bool;
+}
+
+impl FunctionsFilter for Box<dyn FunctionsFilter> {
+    fn filter_functions(&self, sign: &str, func: &Function) -> bool {
+        self.as_ref().filter_functions(sign, func)
+    }
+}
+
 #[derive(Debug, serde::Deserialize)]
 pub enum IncludeExcludeFilter {
     /// Names of the methods that will be included in the merged ABI.
@@ -22,103 +32,37 @@ impl Default for IncludeExcludeFilter {
     }
 }
 
+impl FunctionsFilter for IncludeExcludeFilter {
+    fn filter_functions(&self, signature: &str, func: &Function) -> bool {
+        self.filter(signature, func)
+    }
+}
+
 impl IncludeExcludeFilter {
-    pub fn filter(&self, methods: &[Function]) -> bool {
+    pub fn filter(&self, signature: &str, func: &Function) -> bool {
         match self {
             Self::Include(filter_set) => {
-                filter_set.is_empty() || is_in_filter_set(filter_set, methods)
+                filter_set.is_empty() || is_in_filter_set(filter_set, signature, func)
             }
-            Self::Exclude(filter_set) => !is_in_filter_set(filter_set, methods),
+            Self::Exclude(filter_set) => !is_in_filter_set(filter_set, signature, func),
         }
+    }
+
+    pub fn from_include(include: Vec<String>) -> Self {
+        Self::Include(include.into_iter().collect())
+    }
+
+    pub fn from_exclude(exclude: Vec<String>) -> Self {
+        Self::Exclude(exclude.into_iter().collect())
     }
 }
 
-/// Checks if the given methods are in the given filter set.
+/// Check if the function is in the filter set.
 ///
-/// If there is only one method, it is checked by name. If there are more than
-/// one method, they are checked by signature.
-fn is_in_filter_set(filter_set: &BTreeSet<String>, methods: &[Function]) -> bool {
-    if methods.len() == 1 {
-        return filter_set.contains(&methods[0].name);
-    }
-
-    let methods = BTreeSet::from_iter(methods.iter().map(|method| method.signature()));
-
-    methods.intersection(filter_set).count() == 1
-}
-
-#[cfg(test)]
-mod tests {
-    use ethabi::{Function, Param, ParamType};
-    use once_cell::sync::Lazy;
-
-    static FOO_1: Lazy<Function> = Lazy::new(|| {
-        #[allow(deprecated)]
-        Function {
-            name: "foo".to_owned(),
-            inputs: vec![Param {
-                name: String::from("foo"),
-                kind: ParamType::Address,
-                internal_type: None,
-            }],
-            outputs: vec![],
-            constant: None,
-            state_mutability: ethabi::StateMutability::NonPayable,
-        }
-    });
-
-    static FOO_2: Lazy<Function> = Lazy::new(|| {
-        #[allow(deprecated)]
-        Function {
-            name: "foo".to_owned(),
-            inputs: vec![
-                Param {
-                    name: "foo1".to_owned(),
-                    kind: ParamType::Address,
-                    internal_type: None,
-                },
-                Param {
-                    name: "foo2".to_owned(),
-                    kind: ParamType::Address,
-                    internal_type: None,
-                },
-            ],
-            outputs: vec![],
-            constant: None,
-            state_mutability: ethabi::StateMutability::NonPayable,
-        }
-    });
-
-    mod is_in_filter {
-        use std::collections::BTreeSet;
-
-        use crate::filter::{
-            is_in_filter_set,
-            tests::{FOO_1, FOO_2},
-        };
-
-        #[test]
-        fn test_by_name() {
-            let filter_set = BTreeSet::from_iter(vec![FOO_1.name.clone(), "bar".to_owned()]);
-
-            let methods = vec![FOO_1.clone()];
-
-            assert!(
-                is_in_filter_set(&filter_set, &methods),
-                "Should find `foo` method in the filter set by name"
-            );
-        }
-
-        #[test]
-        fn test_by_signature() {
-            let filter_set = BTreeSet::from_iter(vec![FOO_1.name.clone(), FOO_2.signature()]);
-
-            let methods = vec![FOO_1.clone(), FOO_2.clone()];
-
-            assert!(
-                is_in_filter_set(&filter_set, &methods),
-                "Should find `foo` method in the filter set by signature"
-            );
-        }
-    }
+/// The function is in the filter set if the signature or the name of the function is in the filter set.
+fn is_in_filter_set(filter_set: &BTreeSet<String>, signature: &str, func: &Function) -> bool {
+    filter_set
+        .iter()
+        .find(|filter| filter.as_str() == signature || filter.as_str() == &func.name)
+        .is_some()
 }
