@@ -93,8 +93,11 @@
 
         pluginBuildInputs = with pkgs; [
           binaryen
+          wasm-pack
           wasm-bindgen-cli
           jq
+        ] ++ lib.optional stdenv.isLinux [
+          strace
         ];
 
         plugin = craneLib.mkCargoDerivation (wasmArgs // rec {
@@ -111,9 +114,9 @@
           '';
 
           buildPhaseCargoCommand = ''
-            mkdir -p $PLUGIN_OUT_DIR
+            mkdir -p $out/pkg
 
-            bash $src/plugin/scripts/build.sh
+            strace wasm-pack build --target nodejs --out-dir $out/pkg --release $src/plugin
           '';
 
           buildInputs = pluginBuildInputs;
