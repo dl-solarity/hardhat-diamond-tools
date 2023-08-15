@@ -1,0 +1,24 @@
+[package]
+name = "hardhat-bindings-macro"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[[test]]
+name = "params_derive"
+path = "tests/test_params_derive.rs"
+
+[dependencies]
+hardhat-bindings = { path = "../hardhat-bindings" }
+
+syn = { version = "2.0", features = ["full"] }
+quote = "1.0"
+proc-macro2 = "1.0"
+wasm-bindgen = { workspace = true }
+js-sys = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+serde-wasm-bindgen = { workspace = true }
+serde = { workspace = true }
+convert_case = { workspace = true }

@@ -1,0 +1,23 @@
+[package]
+name = "diamond-tools-cli"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "diamond-tools"
+path = "src/main.rs"
+
+[dependencies]
+diamond-tools-core = { path = "../crates/core" }
+serde = { workspace = true }
+ethabi = { workspace = true }
+serde_json = { workspace = true }
+
+clap = { version = "4.3.17", features = ["derive"] }
+eyre = "0.6.8"
+walkdir = "2.3.3"
+
+log = { workspace = true }
+simplelog = "0.12.1"

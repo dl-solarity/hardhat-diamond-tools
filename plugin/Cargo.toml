@@ -1,0 +1,31 @@
+[package]
+name = "diamond-tools-plugin"
+version = "0.1.0"
+edition = "2021"
+description = "A Hardhat plugin"
+repository = "https://github.com/dl-solidity-library/hardhat-diamond-tools"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = { workspace = true }
+js-sys = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+serde-wasm-bindgen = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true }
+ethabi = { workspace = true }
+
+hardhat-bindings = { path = "../crates/hardhat-bindings" }
+hardhat-bindings-macro = { path = "../crates/hardhat-bindings-macro" }
+diamond-tools-core = { path = "../crates/core" }
+
+thiserror = { version = "1.0.44", default-features = false }
+wee_alloc = "0.4.5"
+
+log = { workspace = true }
+console_log = "1.0.0"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.34"

@@ -1,0 +1,33 @@
+[workspace]
+members = ["cli", "plugin", "crates/*"]
+resolver = "2"
+
+[workspace.dependencies]
+serde = { version = "1.0.103", default-features = false }
+serde_json = "1.0.103"
+wasm-bindgen = { version = "=0.2.84", default-features = false }
+js-sys = "0.3.61"
+wasm-bindgen-futures = "0.4.34"
+serde-wasm-bindgen = "0.5.0"
+thiserror = { version = "1.0.44", default-features = false }
+convert_case = "0.6.0"
+log = "0.4.19"
+
+# TODO(Velnbur): Remove this once the [PR](https://github.com/rust-ethereum/ethabi/pull/298) is merged.
+[workspace.dependencies.ethabi]
+default-features = false
+git = "https://github.com/al8n/ethabi"
+rev = "3decaeaf6fd716d1623d7d0682ece1c78e1f4f50"
+features = ["serde"]
+
+[workspace.package]
+version = "0.1.0"
+authors = ["Velnbur"]
+readme = "README.md"
+license-file = "LICENSE"
+
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true
+codegen-units = 1
